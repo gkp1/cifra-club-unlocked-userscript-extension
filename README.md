@@ -1,3 +1,5 @@
+<img src="language/flags/us.svg" width="20" height="15" alt=""> **English** &nbsp;·&nbsp; <a href="language/README.pt-BR.md"><img src="language/flags/br.svg" width="20" height="15" alt=""> Português (Brasil)</a>
+
 # Cifra Club Unlocked · Userscript Extension
 
 A small userscript that makes [Cifra Club](https://www.cifraclub.com.br) nicer to play from.
@@ -63,7 +65,6 @@ If Cifra Club changes how this works, the unlock may stop working until the scri
 
 - Unofficial project, not affiliated with Cifra Club or Studio Sol.
 - If you use Cifra Club a lot, consider supporting it with [Cifra Club PRO](https://www.cifraclub.com.br/assine/).
-- Portuguese version of this page: [Cifra Club Desbloqueado](https://github.com/gkp1/cifra-club-desbloqueado-userscript-extensao).
 
 ## License
 

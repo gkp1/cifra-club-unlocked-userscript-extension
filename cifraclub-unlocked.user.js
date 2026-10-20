@@ -1,9 +1,11 @@
 // ==UserScript==
 // @name         Cifra Club Unlocked
+// @name:pt      Cifra Club Desbloqueado
 // @name:pt-BR   Cifra Club Desbloqueado
 // @namespace    https://github.com/gkp1
-// @version      2.0.0
+// @version      2.0.1
 // @description  Whole song (chords + lyrics) on one screen with auto-sized columns, split columns and the page-turner pedal without the ad popup, and a light/dark switch.
+// @description:pt    Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, dividir em colunas e pedal passador sem anúncio, e botão de tema claro/escuro.
 // @description:pt-BR Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, dividir em colunas e pedal passador sem anúncio, e botão de tema claro/escuro.
 // @author       gkp1
 // @homepageURL  https://github.com/gkp1/cifra-club-unlocked-userscript-extension
