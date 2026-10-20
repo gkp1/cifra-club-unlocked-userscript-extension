@@ -19,10 +19,11 @@ Chega disso:
 
 ## Instalação
 
-1. Instale um gerenciador de userscripts: [Tampermonkey](https://www.tampermonkey.net/) ou [Violentmonkey](https://violentmonkey.github.io/).
-   No Chrome ou Edge, se o script não rodar, ative **Permitir scripts de usuário** (Allow User Scripts) nos detalhes da extensão (`chrome://extensions` → Tampermonkey → Detalhes).
-2. Clique em **[Instalar o script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. O gerenciador abre uma página de instalação; clique em **Instalar**.
-3. Abra qualquer cifra no cifraclub.com.br. Uma faixa laranja "Aperte L" aparece acima da cifra.
+1. Instale um gerenciador de userscripts: [Tampermonkey](https://www.tampermonkey.net/) ou [Violentmonkey](https://violentmonkey.github.io/). No Firefox, o recomendado é o [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/).
+
+   ⚠️ **No Chrome ou Edge: clique com o botão direito no ícone da extensão → Gerenciar extensão → ative Permitir scripts de usuário (Allow User Scripts).**
+2. Clique aqui: **[Instalar o script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. O gerenciador abre uma página de instalação; clique em **Instalar**.
+3. Abra qualquer cifra ou recarregue a página do Cifra Club. Uma faixa laranja "Aperte L" aparece acima da cifra.
 
 As atualizações chegam sozinhas pelo gerenciador.
 

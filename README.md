@@ -19,10 +19,11 @@ No more of this:
 
 ## Install
 
-1. Install a userscript manager: [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/).
-   On Chrome or Edge, if the script doesn't run, turn on **Allow User Scripts** in the extension's details (`chrome://extensions` → Tampermonkey → Details).
-2. Click **[Install the script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. Your userscript manager opens an install page; click **Install**.
-3. Open any song on cifraclub.com.br. An orange "Press L" banner shows up above the chords.
+1. Install a userscript manager: [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/). On Firefox, [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/) is the recommended one.
+
+   ⚠️ **On Chrome or Edge: right-click the extension's icon → Manage extension → turn on Allow User Scripts.**
+2. Click here: **[Install the script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. Your userscript manager opens an install page; click **Install**.
+3. Open any song or reload the Cifra Club page. An orange "Press L" banner shows up above the chords.
 
 Updates arrive automatically through your userscript manager.
 
