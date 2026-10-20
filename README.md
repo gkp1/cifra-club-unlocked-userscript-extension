@@ -19,7 +19,9 @@ No more of this:
 
 ## Install
 
-1. Install a userscript manager: [Tampermonkey](https://www.tampermonkey.net/) or [Violentmonkey](https://violentmonkey.github.io/). On Firefox, [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/) is the recommended one.
+1. Install Tampermonkey or Violentmonkey, the recommended userscript managers:
+   - **Tampermonkey:** <img src="assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) &nbsp;·&nbsp; <img src="assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/tampermonkey/)
+   - **Violentmonkey:** <img src="assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) &nbsp;·&nbsp; <img src="assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/violentmonkey/)
 
    ⚠️ **On Chrome or Edge: right-click the extension's icon → Manage extension → turn on Allow User Scripts.**
 2. Click here: **[Install the script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. Your userscript manager opens an install page; click **Install**.

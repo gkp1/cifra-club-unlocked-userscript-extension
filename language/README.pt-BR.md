@@ -19,7 +19,9 @@ Chega disso:
 
 ## Instalação
 
-1. Instale um gerenciador de userscripts: [Tampermonkey](https://www.tampermonkey.net/) ou [Violentmonkey](https://violentmonkey.github.io/). No Firefox, o recomendado é o [Violentmonkey](https://addons.mozilla.org/firefox/addon/violentmonkey/).
+1. Instale o Tampermonkey ou o Violentmonkey, os gerenciadores de userscripts recomendados:
+   - **Tampermonkey:** <img src="../assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/tampermonkey/dhdgffkkebhmkfjojejmpbldmpobfkfo) &nbsp;·&nbsp; <img src="../assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/tampermonkey/)
+   - **Violentmonkey:** <img src="../assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) &nbsp;·&nbsp; <img src="../assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/violentmonkey/)
 
    ⚠️ **No Chrome ou Edge: clique com o botão direito no ícone da extensão → Gerenciar extensão → ative Permitir scripts de usuário (Allow User Scripts).**
 2. Clique aqui: **[Instalar o script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. O gerenciador abre uma página de instalação; clique em **Instalar**.
