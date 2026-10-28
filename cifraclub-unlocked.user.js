@@ -3,7 +3,7 @@
 // @name:pt      Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @name:pt-BR   Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @namespace    https://github.com/gkp1
-// @version      2.2.0
+// @version      2.3.0
 // @description  Whole song (chords + lyrics) on one screen with auto-sized columns, on Cifra Club and Ultimate Guitar. Transpose, capo, hide tabs, one-page print, light/dark, screen stays on.
 // @description:pt    Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
 // @description:pt-BR Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
@@ -54,6 +54,8 @@
   // ---------- shared text helpers ----------
   const TABLINE = /^\s*[A-Ga-g][#b]?\s*[|:][-0-9|hpbrxtv\/\\~()^.*=s<>\[\] ]{4,}(\s+x\d+)?\s*$/; // e|--3--| etc.
   const SEC = /^\s*\[[^\]\n]{1,40}\]\s*$/;                                                       // [Verse 1], [Refrão]
+  // Section names written without brackets: "Intro", "Verse 1", "Riff 2:", "Primeira Parte".
+  const SECNAME = /^\s*(intro(dução)?|verse|verso|pre-?chorus|pré-?refrão|chorus|refrão|bridge|ponte|solo|interlude|interlúdio|outro|final|riff|instrumental|coda|(primeira|segunda|terceira|quarta|quinta) parte|parte)(\s+\d+)?\s*:?\s*$/i;
   const CHORD = /^\(?[A-G][#b]?(?:maj|min|m|dim|aug|sus|add|M)?[0-9]*(?:[#b+\-]?[0-9]+|sus[24]?|add[0-9]+|maj[0-9]*|\+|°|ø|\*)*(?:\/[A-G][#b]?)?\)?$/;
   const NOTES_S = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
   const NOTES_F = ['C', 'Db', 'D', 'Eb', 'E', 'F', 'Gb', 'G', 'Ab', 'A', 'Bb', 'B'];
@@ -120,7 +122,12 @@
     for (const l0 of lines) {
       const l = { t: l0.t.replace(/\s+$/, ''), ch: l0.ch.filter(([a]) => a < l0.t.replace(/\s+$/, '').length) };
       if (!l.t.trim()) { cur = null; continue; }
-      if (SEC.test(l.t) && !l.ch.length) { push('sec'); cur.lines.push({ t: l.t.trim(), ch: [] }); cur = null; continue; }
+      if ((SEC.test(l.t) || SECNAME.test(l.t)) && !l.ch.length) {
+        push('sec');
+        cur.lines.push({ t: l.t.trim().replace(/^\[|\]$/g, '').replace(/\s*:$/, ''), ch: [] });
+        cur = null;
+        continue;
+      }
       const kind = TABLINE.test(l.t) ? 'tab' : 'text';
       if (!cur || cur.kind !== kind) push(kind);
       cur.lines.push(kind === 'tab' ? { t: l.t, ch: [] } : l);
@@ -328,8 +335,8 @@
   const DARK = `--bg:#14161a;--panel:rgba(30,33,39,.85);--fg:#e9e6e1;--soft:#9a958d;--chord:#ff9a4d;--chord-bg:rgba(255,154,77,.1);--line:rgba(255,255,255,.09);--sec:#b197fc;--sec-bg:rgba(177,151,252,.12);--tab:#8cc4e8;`;
   const CSS = `
     ${SCOPE} { ${LIGHT}
-      --mono: "JetBrains Mono", "Roboto Mono", ui-monospace, Menlo, Consolas, monospace;
-      --sans: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif; }
+      --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      --sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
     #${ID}.dark, #${ID}-dock.dark { ${DARK} }
 
     /* ---------- view ---------- */
@@ -347,8 +354,10 @@
       background: transparent; cursor: pointer; border: 1px solid var(--line); border-radius: 7px; padding: 3px 8px; }
     #${ID} button:hover { background: var(--chord-bg); }
     #${ID} button.off { opacity: .45; }
-    #${ID} kbd, #${ID}-banner kbd { font: 700 10px var(--sans); color: var(--fg); padding: 1px 5px; border-radius: 4px;
-      border: 1px solid var(--line); background: var(--bg); }
+    /* Key caps are our own spans with every style reset, so the site's kbd/span styles can't reach them. */
+    #${ID} .k, #${ID}-banner .k, #${ID}-dock .k { all: unset !important; display: inline-block !important;
+      font: 700 10px/1.3 var(--sans) !important; color: var(--fg) !important; padding: 1px 5px !important;
+      border-radius: 4px !important; border: 1px solid var(--line) !important; background: var(--bg) !important; }
     #${ID} .cols { flex: 1 1 auto; min-height: 0; overflow: hidden; padding: 14px 22px; box-sizing: border-box;
       column-fill: auto; column-gap: 3ch; column-rule: 1px solid var(--line);
       font-family: var(--mono); font-weight: 450; line-height: 1.3; }
@@ -363,8 +372,9 @@
     #${ID}-banner { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 0 0 18px; padding: 14px 20px;
       border-radius: 14px; cursor: pointer; background: linear-gradient(135deg, #ff8a3d, #e8590c); color: #fff;
       font: 700 20px/1.2 var(--sans); box-shadow: 0 6px 20px rgba(232,89,12,.25); white-space: normal; }
-    #${ID}-banner kbd { display: inline-block; font: 700 20px/1.2 var(--sans); padding: 3px 13px; border-radius: 9px;
-      color: #e8590c !important; background: #fff !important; border: 0; vertical-align: middle; }
+    #${ID}-banner .k { font: 700 20px/1.2 var(--sans) !important; padding: 3px 13px !important; border-radius: 9px !important;
+      color: #e8590c !important; background: #fff !important; border: 0 !important; vertical-align: middle !important; }
+    #${ID}-dock .k { font-size: 11px !important; color: #e8590c !important; background: #fff !important; border: 0 !important; }
 
     /* ---------- floating buttons (site view) ---------- */
     #${ID}-dock { position: fixed; right: 16px; bottom: 16px; z-index: 2147483646; display: flex; gap: 8px; }
@@ -392,10 +402,6 @@
   const shiftKey = () => `${ID}-shift:${SITE.songId()}`;
 
   function build() {
-    const fonts = document.createElement('link');
-    fonts.rel = 'stylesheet';
-    fonts.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap';
-
     ov = document.createElement('div');
     ov.id = ID;
     ov.innerHTML = `
@@ -403,24 +409,23 @@
       <div class="bar">
         <div class="t"></div>
         <span class="grp kg">
-          <button data-a="down" title="${L.down} ([)"><kbd>[</kbd>−</button>
+          <button data-a="down" title="${L.down} ([)"><span class="k">[</span>−</button>
           <span class="key"></span>
-          <button data-a="up" title="${L.up} (])">+<kbd>]</kbd></button>
+          <button data-a="up" title="${L.up} (])">+<span class="k">]</span></button>
         </span>
         <span class="capo"></span>
         <span class="grp">
-          <button data-a="tab"><kbd>T</kbd>${L.tabs}</button>
-          <button data-a="print"><kbd>P</kbd>${L.print}</button>
-          <button data-a="theme"><kbd>D</kbd><i></i></button>
-          <button data-a="fs"><kbd>F</kbd>${L.fullscreen}</button>
-          <button data-a="minus" title="${L.smaller}"><kbd>-</kbd></button>
-          <button data-a="auto" title="${L.auto}"><kbd>0</kbd></button>
-          <button data-a="plus" title="${L.bigger}"><kbd>+</kbd></button>
-          <button data-a="off"><kbd>Esc</kbd>${L.exit}</button>
+          <button data-a="tab"><span class="k">T</span>${L.tabs}</button>
+          <button data-a="print"><span class="k">P</span>${L.print}</button>
+          <button data-a="theme"><span class="k">D</span><i></i></button>
+          <button data-a="fs"><span class="k">F</span>${L.fullscreen}</button>
+          <button data-a="minus" title="${L.smaller}"><span class="k">-</span></button>
+          <button data-a="auto" title="${L.auto}"><span class="k">0</span></button>
+          <button data-a="plus" title="${L.bigger}"><span class="k">+</span></button>
+          <button data-a="off"><span class="k">Esc</span>${L.exit}</button>
         </span>
       </div>
       <div class="cols"></div>`;
-    ov.prepend(fonts);
     cols = ov.querySelector('.cols');
     titleEl = ov.querySelector('.t');
     keyEl = ov.querySelector('.key');
@@ -435,7 +440,7 @@
 
     dock = document.createElement('div');
     dock.id = `${ID}-dock`;
-    dock.innerHTML = `${SITE.themeOutsideView ? '<button class="theme" data-a="theme"></button>' : ''}<button class="open">⛶ ${L.open} <kbd>L</kbd></button>`;
+    dock.innerHTML = `${SITE.themeOutsideView ? '<button class="theme" data-a="theme"></button>' : ''}<button class="open">⛶ ${L.open} <span class="k">L</span></button>`;
     openBtn = dock.querySelector('.open');
     openBtn.addEventListener('click', () => setOpen(true));
     const dt = dock.querySelector('.theme');
@@ -444,7 +449,7 @@
 
     banner = document.createElement('div');
     banner.id = `${ID}-banner`;
-    banner.innerHTML = `<span>${L.press}</span><kbd>L</kbd><span>${L.banner}</span>`;
+    banner.innerHTML = `<span>${L.press}</span><span class="k">L</span><span>${L.banner}</span>`;
     banner.addEventListener('click', () => setOpen(true));
     built = true;
   }
@@ -539,7 +544,7 @@
     const lens = [];
     let sec = '', tabMax = 0;
     for (const b of blocks) {
-      if (b.kind === 'sec') { sec = `<span class="sec">${esc(b.lines[0].t.slice(1, -1))}</span>\n`; continue; }
+      if (b.kind === 'sec') { sec = `<span class="sec">${esc(b.lines[0].t)}</span>\n`; continue; }
       html.push(`<div class="blk${b.kind === 'tab' ? ' tab' : ''}">${sec}${b.lines.map(lineHtml).join('\n')}</div>`);
       sec = '';
       for (const l of b.lines) { lens.push(l.t.length); if (b.kind === 'tab') tabMax = Math.max(tabMax, l.t.length); }
@@ -661,6 +666,12 @@
     const k = e.key.toLowerCase();
     if (k === 'l' && (open || SITE.findSong())) { setOpen(!open); }
     else if (!open && k === 'd' && SITE.themeOutsideView) act('theme');
+    else if (!open && (k === '[' || k === ']')) {
+      // On the page itself, [ ] press the site's own transpose buttons (when it has them).
+      const b = SITE.findSong() && SITE.keyButtons()[k === ']' ? 'up' : 'down'];
+      if (!b) return;
+      b.click();
+    }
     else if (!open) return;
     else if (e.key === 'Escape') { if (document.fullscreenElement) return; act('off'); }
     else if (KEYS[k]) act(KEYS[k]);

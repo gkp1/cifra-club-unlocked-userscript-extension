@@ -2,10 +2,12 @@
 
 # Chords Unlocked: Ultimate Guitar + Cifra Club · Userscript Extension
 
+[![Discord](https://img.shields.io/badge/Discord-Join%20the%20server-5865F2?logo=discord&logoColor=white)](https://discord.gg/rtVf2zyM8c)
+
 A small, free userscript that makes [Ultimate Guitar](https://tabs.ultimate-guitar.com) and [Cifra Club](https://www.cifraclub.com.br) nicer to play from. Three things it does on any song, on both sites:
 
-1. **Easy, free chord transpose:** `[` `]` move the key half a step. On Ultimate Guitar it works on every chords and tab page, even tab pages that have no transpose button. The chords stay over the right words.
-2. **Tabs toggle with smart chord detection:** `T` hides or shows the tablature. The script tells chords, lyrics and tablature apart by itself, even on tab pages that don't mark the chords.
+1. **Easy, free chord transpose:** `[` `]` move the key half a step, on the page or in the full-screen view. On Ultimate Guitar it works on every chords and tab page, even tab pages that have no transpose button. The chords stay over the right words.
+2. **Tabs toggle with smart chord detection:** `T` hides or shows the tablature. The script tells chords, lyrics, tablature and section names apart by itself, even on tab pages that don't mark the chords.
 3. **Full-screen view:** press `L` and the whole song fits on one screen, in auto-sized columns, no scrolling.
 
 | Dark | Light |
@@ -40,7 +42,7 @@ Updates arrive automatically through your userscript manager.
 | Key | What it does | Where |
 |---|---|---|
 | `L` | Open / close the full-screen view | song pages |
-| `[` / `]` | Key half a step down / up | full-screen view, on every Ultimate Guitar chords and tab page |
+| `[` / `]` | Key half a step down / up | song pages and the full-screen view (on Ultimate Guitar tab pages with no transpose button, in the view) |
 | `D` | Light / dark theme | anywhere on Cifra Club, full-screen view on Ultimate Guitar |
 | `T` | Show / hide tablature | full-screen view, songs with tabs |
 | `P` | Print or save as PDF, on one page | full-screen view |
@@ -68,7 +70,7 @@ const UNLOCK = true;    // Cifra Club: columns and pedal without the ad. Ultimat
 
 That's all it does:
 
-- Everything happens in your browser and the script sends nothing anywhere. The only thing it downloads is the fonts for the full-screen view (Inter and JetBrains Mono, from Google Fonts).
+- Everything happens in your browser. The script downloads nothing and sends nothing anywhere.
 - It doesn't touch your account, doesn't log in for you, and doesn't pretend you're a subscriber.
 - Features the sites check on their servers stay as they are. Ultimate Guitar's Official and Pro tabs stay locked, and the script stays off on those pages.
 

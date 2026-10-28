@@ -2,10 +2,12 @@
 
 # Cifras Desbloqueadas: Ultimate Guitar + Cifra Club · Userscript Extensão
 
+[![Discord](https://img.shields.io/badge/Discord-Entre%20no%20servidor-5865F2?logo=discord&logoColor=white)](https://discord.gg/rtVf2zyM8c)
+
 Um userscript pequeno e grátis que deixa o [Ultimate Guitar](https://tabs.ultimate-guitar.com) e o [Cifra Club](https://www.cifraclub.com.br) melhores pra tocar. Três coisas que ele faz em qualquer música, nos dois sites:
 
-1. **Mudar o tom, fácil e de graça:** `[` `]` sobem ou descem meio tom. No Ultimate Guitar funciona em todas as páginas de cifra e de tablatura, até nas tablaturas que não têm botão de tom. Os acordes ficam em cima das palavras certas.
-2. **Liga/desliga tablaturas, com detecção inteligente de acordes:** `T` esconde ou mostra as tablaturas. O script separa sozinho acordes, letra e tablatura, mesmo nas tablaturas que não marcam os acordes.
+1. **Mudar o tom, fácil e de graça:** `[` `]` sobem ou descem meio tom, na página ou no modo tela cheia. No Ultimate Guitar funciona em todas as páginas de cifra e de tablatura, até nas tablaturas que não têm botão de tom. Os acordes ficam em cima das palavras certas.
+2. **Liga/desliga tablaturas, com detecção inteligente de acordes:** `T` esconde ou mostra as tablaturas. O script separa sozinho acordes, letra, tablatura e nomes das partes, mesmo nas tablaturas que não marcam os acordes.
 3. **Modo tela cheia:** aperte `L` e a música inteira cabe numa tela só, em colunas com fonte automática, sem rolagem.
 
 | Escuro | Claro |
@@ -40,7 +42,7 @@ As atualizações chegam sozinhas pelo gerenciador.
 | Tecla | O que faz | Onde |
 |---|---|---|
 | `L` | Abre / fecha o modo tela cheia | páginas de cifra |
-| `[` / `]` | Meio tom abaixo / acima | modo tela cheia, em todas as cifras e tablaturas do Ultimate Guitar |
+| `[` / `]` | Meio tom abaixo / acima | páginas de cifra e modo tela cheia (nas tablaturas do Ultimate Guitar sem botão de tom, só no modo) |
 | `D` | Tema claro / escuro | em todo o Cifra Club, no modo tela cheia no Ultimate Guitar |
 | `T` | Mostra / esconde as tablaturas | modo tela cheia, músicas com tablatura |
 | `P` | Imprime ou salva em PDF, numa página | modo tela cheia |
@@ -68,7 +70,7 @@ const UNLOCK = true;    // Cifra Club: colunas e pedal sem anúncio. Ultimate Gu
 
 É só isso:
 
-- Tudo acontece no seu navegador e o script não envia nada pra lugar nenhum. A única coisa que ele baixa são as fontes do modo tela cheia (Inter e JetBrains Mono, do Google Fonts).
+- Tudo acontece no seu navegador. O script não baixa nada e não envia nada pra lugar nenhum.
 - Não mexe na sua conta, não faz login por você e não finge que você é assinante.
 - Recursos que os sites conferem no servidor continuam como estão. As tablaturas Official e Pro do Ultimate Guitar continuam bloqueadas, e o script fica desligado nessas páginas.
 
