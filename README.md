@@ -32,7 +32,7 @@ No more of this on Cifra Club:
    - **Violentmonkey:** <img src="assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) &nbsp;·&nbsp; <img src="assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/violentmonkey/)
 
    ⚠️ **On Chrome or Edge: right-click the extension's icon → Manage extension → turn on Allow User Scripts.**
-2. Click here: **[Install the script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. Your userscript manager opens an install page; click **Install**.
+2. Click here: **[Install the script](https://update.greasyfork.org/scripts/602553/Chords%20Unlocked%3A%20Ultimate%20Guitar%20%2B%20Cifra%20Club.user.js)**. Your userscript manager opens an install page; click **Install**.
 3. Open any song on Ultimate Guitar or Cifra Club, or reload the page. An orange "Press L" banner shows up above the chords.
 
 Updates arrive automatically through your userscript manager.

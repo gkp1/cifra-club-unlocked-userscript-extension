@@ -32,7 +32,7 @@ Chega disso no Cifra Club:
    - **Violentmonkey:** <img src="../assets/icons/chrome.svg" width="16" height="16" alt=""> [Chrome](https://chromewebstore.google.com/detail/violentmonkey/jinjaccalgkegednnccohejagnlnfdag) &nbsp;·&nbsp; <img src="../assets/icons/firefox.svg" width="16" height="16" alt=""> [Firefox](https://addons.mozilla.org/firefox/addon/violentmonkey/)
 
    ⚠️ **No Chrome ou Edge: clique com o botão direito no ícone da extensão → Gerenciar extensão → ative Permitir scripts de usuário (Allow User Scripts).**
-2. Clique aqui: **[Instalar o script](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js)**. O gerenciador abre uma página de instalação; clique em **Instalar**.
+2. Clique aqui: **[Instalar o script](https://update.greasyfork.org/scripts/602553/Chords%20Unlocked%3A%20Ultimate%20Guitar%20%2B%20Cifra%20Club.user.js)**. O gerenciador abre uma página de instalação; clique em **Instalar**.
 3. Abra qualquer cifra no Ultimate Guitar ou no Cifra Club, ou recarregue a página. Uma faixa laranja "Aperte L" aparece acima da cifra.
 
 As atualizações chegam sozinhas pelo gerenciador.

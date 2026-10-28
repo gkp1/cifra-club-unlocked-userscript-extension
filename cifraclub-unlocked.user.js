@@ -3,15 +3,15 @@
 // @name:pt      Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @name:pt-BR   Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @namespace    https://github.com/gkp1
-// @version      2.3.0
+// @version      2.3.1
 // @description  Whole song (chords + lyrics) on one screen with auto-sized columns, on Cifra Club and Ultimate Guitar. Transpose, capo, hide tabs, one-page print, light/dark, screen stays on.
 // @description:pt    Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
 // @description:pt-BR Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
 // @author       gkp1
 // @homepageURL  https://github.com/gkp1/cifra-club-unlocked-userscript-extension
 // @supportURL   https://github.com/gkp1/cifra-club-unlocked-userscript-extension/issues
-// @downloadURL  https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js
-// @updateURL    https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/cifraclub-unlocked.user.js
+// @downloadURL  https://update.greasyfork.org/scripts/602553/Chords%20Unlocked%3A%20Ultimate%20Guitar%20%2B%20Cifra%20Club.user.js
+// @updateURL    https://update.greasyfork.org/scripts/602553/Chords%20Unlocked%3A%20Ultimate%20Guitar%20%2B%20Cifra%20Club.meta.js
 // @license      MIT
 // @match        https://www.cifraclub.com.br/*
 // @match        https://www.cifraclub.com/*
