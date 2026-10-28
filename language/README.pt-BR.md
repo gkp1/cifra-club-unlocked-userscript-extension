@@ -10,9 +10,9 @@ Um userscript pequeno e grátis que deixa o [Ultimate Guitar](https://tabs.ultim
 2. **Liga/desliga tablaturas, com detecção inteligente de acordes:** `T` esconde ou mostra as tablaturas. O script separa sozinho acordes, letra, tablatura e nomes das partes, mesmo nas tablaturas que não marcam os acordes.
 3. **Modo tela cheia:** aperte `L` e a música inteira cabe numa tela só, em colunas com fonte automática, sem rolagem.
 
-| Escuro | Claro |
-|---|---|
-| ![O modo tela cheia no tema escuro, no Ultimate Guitar: a música inteira em três colunas, com acordes destacados, nomes das partes e tablaturas](../screenshots/pt-BR/view-dark.png) | ![O mesmo modo tela cheia no tema claro](../screenshots/pt-BR/view-light.png) |
+![O modo tela cheia no tema escuro, no Ultimate Guitar: a música inteira em três colunas, com acordes destacados, nomes das partes e tablaturas](../screenshots/pt-BR/view-dark.png)
+
+![O mesmo modo tela cheia no tema claro](../screenshots/pt-BR/view-light.png)
 
 **E mais**
 - **Ultimate Guitar:** os espaços de anúncio e o popup de cadastro ("Sign up") somem
