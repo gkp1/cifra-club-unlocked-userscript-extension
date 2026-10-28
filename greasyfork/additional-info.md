@@ -4,9 +4,9 @@ A small, free userscript that makes [Ultimate Guitar](https://tabs.ultimate-guit
 2. **Tabs toggle with smart chord detection:** `T` hides or shows the tablature. The script tells chords, lyrics, tablature and section names apart by itself, even on tab pages that don't mark the chords.
 3. **Full-screen view:** press `L` and the whole song fits on one screen, in auto-sized columns, no scrolling.
 
-| Dark | Light |
-|---|---|
-| ![The full-screen view in dark mode on Ultimate Guitar: the whole song in three columns, with highlighted chords, section labels and tablature](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/screenshots/view-dark.png) | ![The same full-screen view in light mode](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/screenshots/view-light.png) |
+![The full-screen view in dark mode on Ultimate Guitar: the whole song in three columns, with highlighted chords, section labels and tablature](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/screenshots/view-dark.png)
+
+![The same full-screen view in light mode](https://raw.githubusercontent.com/gkp1/cifra-club-unlocked-userscript-extension/main/screenshots/view-light.png)
 
 ## Also
 
