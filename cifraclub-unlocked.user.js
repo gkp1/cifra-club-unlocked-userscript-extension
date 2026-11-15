@@ -3,7 +3,7 @@
 // @name:pt      Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @name:pt-BR   Cifras Desbloqueadas: Ultimate Guitar + Cifra Club
 // @namespace    https://github.com/gkp1
-// @version      2.3.1
+// @version      2.4.0
 // @description  Whole song (chords + lyrics) on one screen with auto-sized columns, on Cifra Club and Ultimate Guitar. Transpose, capo, hide tabs, one-page print, light/dark, screen stays on.
 // @description:pt    Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
 // @description:pt-BR Cifra inteira (acordes + letra) numa tela só, em colunas com fonte automática, no Cifra Club e no Ultimate Guitar. Tom, capo, esconder tabs, impressão em uma página, tema claro/escuro, tela sempre ligada.
@@ -161,7 +161,8 @@
       songId() { return location.pathname; },
       parse() { const p = this.findSong(); return p ? toBlocks(domLines(p, this.chordEl)) : null; },
       keyButtons() {
-        const all = [...document.querySelectorAll('button, a[role="button"], [role="button"]')];
+        const all = [...document.querySelectorAll('button, a[role="button"], [role="button"]')]
+          .filter((b) => !b.closest(`#${ID}, #${ID}-dock, #${ID}-banner`));
         const by = (re) => all.find((b) => re.test(`${b.getAttribute('aria-label') || ''} ${b.title || ''}`));
         return { down: by(this.keyRe.down), up: by(this.keyRe.up) };
       },
@@ -324,6 +325,8 @@
   let chordTip, chordPicker, chordStrip, chordBtn;
   let curBlocks = null;
   let tipHideT;
+  const ugTransCache = {};   // { offset: { current, variations } } for UG transposed chords
+  const ugTransPending = {}; // offsets with an in-flight fetch
 
   // A shape is { f: [6 frets low E -> high e] (-1 mute, 0 open), g: [6 fingers] | null }.
   const shapeKey = (s) => (s && s.f) ? s.f.join(',') : '';
@@ -345,6 +348,25 @@
       return isNaN(n) ? -1 : n;
     });
     return { f, g: null };
+  }
+
+  // Shift a shape's frets by n semitones (mute stays; open -> fret n when transposing up).
+  function shiftShape(s, n) {
+    if (!s || !n) return s;
+    return {
+      f: s.f.map((v) => (v === -1 ? -1 : v === 0 ? (n > 0 ? n : 0) : Math.max(1, v + n))),
+      g: s.g,
+    };
+  }
+
+  // Re-key a { name: shape | shape[] } map by transposed names, with frets shifted accordingly.
+  function transposedMap(map, n, flats) {
+    const out = {};
+    for (const name of Object.keys(map)) {
+      const v = map[name];
+      out[shift(name, n, flats)] = Array.isArray(v) ? v.map((s) => shiftShape(s, n)) : shiftShape(v, n);
+    }
+    return out;
   }
 
   function readChordsCifra() {
@@ -376,18 +398,32 @@
         }
       }
     }
+    if (local) {
+      // Cifra Club has no usable site transpose, so [ ] shift the view only. Re-key the chord
+      // data by the same shifted names so the diagrams follow the transposed view.
+      const names = Object.keys(current).join(' ');
+      const flats = /\b[A-G]b/.test(names) && !/\b[A-G]#/.test(names);
+      return {
+        current: transposedMap(current, local, flats),
+        variations: variations ? transposedMap(variations, local, flats) : null,
+        alias: {},
+      };
+    }
     return { current, variations, alias };
   }
 
-  function readChordsUG() {
-    let d = null;
-    try { d = window.UGAPP && UGAPP.store && UGAPP.store.page && UGAPP.store.page.data; } catch (e) {}
-    const app = d && d.tab_view && d.tab_view.applicature;
-    if (!app) return null;
+  // Normalize UG's applicature object (name -> array of shapes) into our shape map.
+  // The page's applicature is name -> array; the transpose endpoint returns name -> { "0": shape,
+  // "1": shape, ..., "old_ch": name }, so we accept both shapes.
+  function ugShapes(app) {
     const variations = {};
     for (const name of Object.keys(app)) {
+      const raw = app[name];
+      const list = Array.isArray(raw)
+        ? raw
+        : Object.values(raw).filter((v) => v && typeof v === 'object' && Array.isArray(v.frets));
       // UG lists frets/fingers high e -> low E; our SVG draws low E -> high e, so reverse.
-      variations[name] = app[name].map((v) => ({
+      variations[name] = list.map((v) => ({
         f: (v.frets || []).slice().reverse(),
         g: v.fingers ? v.fingers.slice().reverse() : null,
       }));
@@ -395,6 +431,49 @@
     const current = {};
     for (const name of Object.keys(variations)) current[name] = variations[name][0];
     return { current, variations, alias: {} };
+  }
+
+  // Does UG's rendered (transposed) text spell the chords with flats? Sharps otherwise.
+  function ugFlats() {
+    const t = (SITE.findSong() || {}).textContent || '';
+    const f = /\b[A-G]b/.test(t), s = /\b[A-G]#/.test(t);
+    return f === s ? false : f;
+  }
+
+  // UG keeps the shapes for the song's original chords in `applicature` only. When transposed,
+  // it fetches the transposed shapes from its own applicature endpoint; we do the same.
+  function fetchUGTransposed(names, n) {
+    if (ugTransPending[n]) return;
+    ugTransPending[n] = true;
+    const tuning = ((SITE.meta(SITE.data()).tuning || {}).value) || 'E A D G B E';
+    const qs = names.map((x) => `${encodeURIComponent(x)}=${encodeURIComponent(x)}`).join('&');
+    const url = `https://tabs.ultimate-guitar.com/tab/applicature/transpose?${qs}&appl_api_version=2&custom=0&instr=guitar&json=1&tuning=${encodeURIComponent(tuning)}`;
+    fetch(url, { credentials: 'include' })
+      .then((r) => r.json())
+      .then((json) => {
+        const app = json && json.info && json.info.applicature;
+        if (!app) return;
+        const data = ugShapes(app);
+        ugTransCache[n] = data;
+        chordsData = data;
+        if (curBlocks) renderStrip(curBlocks);
+      })
+      .catch(() => {})
+      .finally(() => { delete ugTransPending[n]; });
+  }
+
+  function readChordsUG() {
+    let d = null;
+    try { d = window.UGAPP && UGAPP.store && UGAPP.store.page && UGAPP.store.page.data; } catch (e) {}
+    const app = d && d.tab_view && d.tab_view.applicature;
+    if (!app) return null;
+    const n = SITE.offset();
+    if (!n) return ugShapes(app);
+    if (ugTransCache[n]) return ugTransCache[n];
+    // Transposed: request the shapes for the shifted chord names (async; re-renders on arrival).
+    const names = Object.keys(app).map((name) => shift(name, n, ugFlats()));
+    fetchUGTransposed(names, n);
+    return null;
   }
 
   function readChords() { return SITE === SITES.ug ? readChordsUG() : readChordsCifra(); }
