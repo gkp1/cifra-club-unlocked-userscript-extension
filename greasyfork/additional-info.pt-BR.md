@@ -15,6 +15,7 @@ Um userscript pequeno e grátis que deixa o [Ultimate Guitar](https://tabs.ultim
 - **Tom e capo à vista:** o modo mostra o tom atual, mesmo depois de mudar, e o capotraste (e a afinação no Ultimate Guitar)
 - **Impressão e tema:** `P` imprime a cifra inteira numa página, `D` troca o tema claro/escuro (no Cifra Club, o site e o modo juntos)
 - **Feito pra tocar:** a tela não apaga com o modo aberto, e o tamanho do texto fica salvo pra cada música
+- **Desenhos dos acordes:** passe o mouse sobre um acorde no modo tela cheia para ver a digitação, no Cifra Club e no Ultimate Guitar. Clique num acorde para escolher outra posição — ela fica salva e aparece no hover e no topo.
 
 Chega disso no Cifra Club:
 
@@ -28,6 +29,7 @@ Chega disso no Cifra Club:
 | `[` / `]` | Meio tom abaixo / acima | páginas de cifra e modo tela cheia (nas tablaturas do Ultimate Guitar sem botão de tom, só no modo) |
 | `D` | Tema claro / escuro | em todo o Cifra Club, no modo tela cheia no Ultimate Guitar |
 | `T` | Mostra / esconde as tablaturas | modo tela cheia, músicas com tablatura |
+| `C` | Mostra / esconde os desenhos dos acordes no topo | modo tela cheia, Cifra Club e Ultimate Guitar |
 | `P` | Imprime ou salva em PDF, numa página | modo tela cheia |
 | `F` | Tela cheia do navegador | modo tela cheia |
 | `+` / `-` | Aumenta / diminui o texto | modo tela cheia |

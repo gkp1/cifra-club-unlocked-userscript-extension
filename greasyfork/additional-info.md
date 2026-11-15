@@ -15,6 +15,7 @@ A small, free userscript that makes [Ultimate Guitar](https://tabs.ultimate-guit
 - **Key and capo at a glance:** the view shows the current key, even after you transpose, plus the capo (and the tuning on Ultimate Guitar)
 - **Print and theme:** `P` prints the whole song on one page, `D` switches light/dark (on Cifra Club, the site and the view together)
 - **Made for playing:** the screen stays on while the view is open, and your text size is remembered per song
+- **Chord diagrams:** hover any chord in the full-screen view to see its fingering, on Cifra Club and Ultimate Guitar. Click a chord to pick a different voicing — it's saved and shows on hover and at the top.
 
 No more of this on Cifra Club:
 
@@ -28,6 +29,7 @@ No more of this on Cifra Club:
 | `[` / `]` | Key half a step down / up | song pages and the full-screen view (on Ultimate Guitar tab pages with no transpose button, in the view) |
 | `D` | Light / dark theme | anywhere on Cifra Club, full-screen view on Ultimate Guitar |
 | `T` | Show / hide tablature | full-screen view, songs with tabs |
+| `C` | Show / hide the chord diagrams at the top | full-screen view, Cifra Club and Ultimate Guitar |
 | `P` | Print or save as PDF, on one page | full-screen view |
 | `F` | Browser fullscreen | full-screen view |
 | `+` / `-` | Bigger / smaller text | full-screen view |

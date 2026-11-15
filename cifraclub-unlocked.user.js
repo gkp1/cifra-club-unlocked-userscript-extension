@@ -313,15 +313,214 @@
   }
   safe('unlock', () => SITE.unlock())();
 
+  // ============ chord diagrams (Cifra Club + Ultimate Guitar) ============
+  // Cifra Club renders a chord list ([data-chords-list]); Ultimate Guitar exposes the shapes in
+  // window.UGAPP.store.page.data.tab_view.applicature. We reuse that data to draw our own
+  // diagrams, show a hover tooltip and a variation picker on both sites.
+  const HAS_CHORDS = SITE === SITES.cifraclub || SITE === SITES.ug;
+  let chordsData = null;    // { current:{name:shape}, variations:{name:[shape]}, alias:{text:name} }
+  let chordPrefs = {};      // { name: shape } user's saved variation per chord (shape = {f:[..],g:[..]|null})
+  let chordStripOn = false;
+  let chordTip, chordPicker, chordStrip, chordBtn;
+  let curBlocks = null;
+  let tipHideT;
+
+  // A shape is { f: [6 frets low E -> high e] (-1 mute, 0 open), g: [6 fingers] | null }.
+  const shapeKey = (s) => (s && s.f) ? s.f.join(',') : '';
+
+  const chordKey = () => `${ID}-chords:${SITE.songId()}`;
+  const loadChords = () => {
+    try {
+      chordPrefs = JSON.parse(store(chordKey()) || '{}') || {};
+      for (const k of Object.keys(chordPrefs)) if (typeof chordPrefs[k] === 'string') chordPrefs[k] = mountToShape(chordPrefs[k]);
+    } catch (e) { chordPrefs = {}; }
+  };
+  const saveChords = () => { try { store(chordKey(), JSON.stringify(chordPrefs)); } catch (e) {} };
+
+  // Cifra Club's data-mount string "3 5 5 3 3 3" (X mute, 0 open, Px barre) -> shape.
+  function mountToShape(str) {
+    const f = String(str || '').split(/\s+/).slice(0, 6).map((p) => {
+      if (p === 'X' || p === 'x') return -1;
+      const n = parseInt(p.replace(/^P/i, ''), 10);
+      return isNaN(n) ? -1 : n;
+    });
+    return { f, g: null };
+  }
+
+  function readChordsCifra() {
+    const list = document.querySelector('[data-chords-list="true"]');
+    if (!list) return null;
+    const current = {};
+    list.querySelectorAll('li[data-chord-name]').forEach((li) => {
+      const m = li.querySelector('[data-mount]');
+      if (m) current[li.getAttribute('data-chord-name')] = mountToShape(m.getAttribute('data-mount'));
+    });
+    const alias = {};
+    document.querySelectorAll('pre b[data-chord-name]').forEach((b) => {
+      const t = (b.textContent || '').replace(/\s+/g, ' ').trim();
+      if (t) alias[t] = b.getAttribute('data-chord-name');
+    });
+    let variations = null;
+    const fk = Object.keys(list).find((k) => k.indexOf('__reactFiber') === 0);
+    if (fk) {
+      for (let node = list[fk], d = 0; node && d < 40; node = node.return, d++) {
+        const p = node.memoizedProps;
+        if (p && p.chords && p.chords.length && p.chords[0].shapeList) {
+          variations = {};
+          for (const c of p.chords) {
+            const g = c.shapeList.find((sl) => sl.instrumentType === 1);
+            const t = g && g.shapeTunings.find((st) => st.tuning === 'default');
+            variations[c.name] = t ? t.shapes.map(mountToShape) : [];
+          }
+          break;
+        }
+      }
+    }
+    return { current, variations, alias };
+  }
+
+  function readChordsUG() {
+    let d = null;
+    try { d = window.UGAPP && UGAPP.store && UGAPP.store.page && UGAPP.store.page.data; } catch (e) {}
+    const app = d && d.tab_view && d.tab_view.applicature;
+    if (!app) return null;
+    const variations = {};
+    for (const name of Object.keys(app)) {
+      // UG lists frets/fingers high e -> low E; our SVG draws low E -> high e, so reverse.
+      variations[name] = app[name].map((v) => ({
+        f: (v.frets || []).slice().reverse(),
+        g: v.fingers ? v.fingers.slice().reverse() : null,
+      }));
+    }
+    const current = {};
+    for (const name of Object.keys(variations)) current[name] = variations[name][0];
+    return { current, variations, alias: {} };
+  }
+
+  function readChords() { return SITE === SITES.ug ? readChordsUG() : readChordsCifra(); }
+
+  const chordName = (text) => (chordsData && chordsData.alias && chordsData.alias[text]) || text;
+  function chordVariations(name) { return (chordsData && chordsData.variations) ? (chordsData.variations[name] || null) : null; }
+  function chordShape(name) {
+    if (!chordsData) return null;
+    if (chordPrefs[name]) return chordPrefs[name];
+    if (chordsData.current && chordsData.current[name]) return chordsData.current[name];
+    const v = chordVariations(name);
+    return (v && v.length) ? v[0] : null;
+  }
+
+  // shape ({ f: frets low->high, g: fingers|null }) -> SVG diagram.
+  function chordSVG(s) {
+    const frets = s.f.slice(0, 6);
+    const fingers = s.g;
+    const played = frets.filter((f) => f > 0);
+    const minF = played.length ? Math.min.apply(null, played) : 1;
+    const maxF = played.length ? Math.max.apply(null, played) : 1;
+    const start = minF <= 1 ? 1 : minF;
+    let fc = Math.max(4, maxF - start + 1);
+    if (fc > 8) fc = 8;
+    const W = 80, padX = 18, stepX = 10, topY = 22, fretH = 16;
+    const H = topY + fc * fretH + 8;
+    const xs = frets.map((_, i) => padX + i * stepX);
+    let out = `<svg class="ccd-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">`;
+    if (start === 1) out += `<line class="nut" x1="${xs[0]}" y1="${topY}" x2="${xs[xs.length - 1]}" y2="${topY}"/>`;
+    else out += `<text class="fretnum" x="3" y="${topY + fretH * 0.5 + 3}">${start}</text>`;
+    for (let i = 0; i <= fc; i++) out += `<line class="fret" x1="${xs[0]}" y1="${topY + i * fretH}" x2="${xs[xs.length - 1]}" y2="${topY + i * fretH}"/>`;
+    for (const x of xs) out += `<line class="str" x1="${x}" y1="${topY}" x2="${x}" y2="${topY + fc * fretH}"/>`;
+    for (let i = 0; i < frets.length; i++) {
+      const f = frets[i];
+      if (f <= 0) continue;
+      const y = topY + (f - start + 0.5) * fretH;
+      if (y > topY + fc * fretH) continue;
+      out += `<circle class="dot" cx="${xs[i]}" cy="${y}" r="4.4"/>`;
+      if (fingers && fingers[i]) out += `<text class="finger" text-anchor="middle" x="${xs[i]}" y="${y + 3.4}">${fingers[i]}</text>`;
+    }
+    for (let i = 0; i < frets.length; i++) {
+      const f = frets[i];
+      if (f === -1) out += `<text class="mark" text-anchor="middle" x="${xs[i]}" y="${topY - 5}">X</text>`;
+      else if (f === 0) out += `<text class="mark" text-anchor="middle" x="${xs[i]}" y="${topY - 5}">O</text>`;
+    }
+    return out + '</svg>';
+  }
+
+  function chordCell(name, shape, active, withName, idx) {
+    return `<div class="ccd${active ? ' on' : ''}" data-chord="${esc(name)}"${idx === undefined ? '' : ` data-idx="${idx}"`} role="button" tabindex="0" title="${esc(name)}">${chordSVG(shape)}${withName ? `<span class="ccd-name">${esc(name)}</span>` : ''}</div>`;
+  }
+
+  // Unique chords in order of first appearance.
+  function songChords(blocks) {
+    const seen = {};
+    const out = [];
+    for (const b of blocks) {
+      for (const l of b.lines) {
+        for (const [a, bb] of l.ch) {
+          const n = chordName(l.t.slice(a, bb));
+          if (!seen[n]) { seen[n] = 1; out.push(n); }
+        }
+      }
+    }
+    return out;
+  }
+
+  function renderStrip(blocks) {
+    if (!chordStrip) return;
+    curBlocks = blocks;
+    const names = songChords(blocks);
+    chordStrip.innerHTML = names.length
+      ? names.map((n) => { const sh = chordShape(n); return sh ? chordCell(n, sh, chordPrefs[n] ? shapeKey(chordPrefs[n]) === shapeKey(sh) : false, true) : ''; }).join('')
+      : `<div class="ccd-empty">${esc(L.chords)}</div>`;
+  }
+
+  function renderPicker(name) {
+    if (!chordPicker) return;
+    const vs = chordVariations(name);
+    const cur = chordShape(name);
+    if (!vs || !vs.length) return;
+    chordPicker.innerHTML = `<div class="cp-head"><b>${esc(name)}</b><span>${esc(L.variations)}</span></div><div class="cp-grid">${vs.map((sh, i) => chordCell(name, sh, shapeKey(sh) === shapeKey(cur), false, i)).join('')}</div>`;
+    chordPicker.parentElement.classList.add('on');
+    chordPicker.parentElement.dataset.chord = name;
+  }
+  function hidePicker() { if (chordPicker) chordPicker.parentElement.classList.remove('on'); }
+
+  function showTip(name, x, y) {
+    if (!chordTip) return;
+    const sh = chordShape(name);
+    if (!sh) { hideTip(); return; }
+    clearTimeout(tipHideT);
+    chordTip.innerHTML = `<div class="tip-name">${esc(name)}</div>${chordSVG(sh)}<div class="tip-hint">${esc(L.vary)}</div>`;
+    chordTip.dataset.chord = name;
+    chordTip.classList.add('on');
+    const r = chordTip.getBoundingClientRect();
+    const vr = ov.getBoundingClientRect();
+    let tx = x - r.width / 2, ty = y - r.height - 8;
+    if (ty < vr.top + 8) ty = y + 18;
+    tx = Math.min(Math.max(tx, vr.left + 8), vr.right - r.width - 8);
+    chordTip.style.left = `${tx - vr.left}px`;
+    chordTip.style.top = `${ty - vr.top}px`;
+  }
+  function hideTip() {
+    if (!chordTip) return;
+    clearTimeout(tipHideT);
+    tipHideT = setTimeout(() => chordTip.classList.remove('on'), 250);
+  }
+
+  const syncChords = safe('syncChords', () => {
+    if (!HAS_CHORDS || !chordBtn) return;
+    ov.classList.toggle('chords-on', chordStripOn);
+    chordBtn.classList.toggle('off', !chordStripOn);
+  });
+
   // ---------- UI text (follows your browser language) ----------
   const L = /^pt\b/i.test(navigator.language || '') ? {
     exit: 'sair', fullscreen: 'tela cheia', theme: 'tema', tabs: 'tabs', print: 'imprimir', key: 'Tom', capo: 'Capo',
     smaller: 'Menor', auto: 'Ajuste automático', bigger: 'Maior', down: 'Meio tom abaixo', up: 'Meio tom acima',
     toDark: 'Tema escuro', toLight: 'Tema claro', open: 'Tela cheia', press: 'Aperte', banner: 'para ver a cifra inteira em tela cheia',
+    chords: 'Acordes', variations: 'Variações', vary: 'Clique para variar',
   } : {
     exit: 'exit', fullscreen: 'fullscreen', theme: 'theme', tabs: 'tabs', print: 'print', key: 'Key', capo: 'Capo',
     smaller: 'Smaller', auto: 'Auto fit', bigger: 'Bigger', down: 'Half step down', up: 'Half step up',
     toDark: 'Dark theme', toLight: 'Light theme', open: 'Full screen', press: 'Press', banner: 'to see the whole song on one screen',
+    chords: 'Chords', variations: 'Variations', vary: 'Click to vary',
   };
 
   const ICON = {
@@ -383,6 +582,41 @@
       box-shadow: 0 6px 18px rgba(232,89,12,.3); }
     #${ID}-dock button.theme { padding: 9px 11px; background: var(--panel); color: var(--fg); border: 1px solid var(--line); }
 
+    /* ---------- chord diagrams (Cifra Club) ---------- */
+    #${ID}-strip { display: none; flex: 0 0 auto; gap: 12px; padding: 10px 16px 12px; overflow-x: auto; overflow-y: hidden;
+      border-bottom: 1px solid var(--line); }
+    #${ID}.chords-on #${ID}-strip { display: flex; }
+    #${ID}-strip .ccd, #${ID}-picker .ccd { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer;
+      padding: 6px 4px 5px; border-radius: 10px; border: 1px solid transparent; }
+    #${ID}-strip .ccd { flex: 0 0 auto; }
+    #${ID}-strip .ccd:hover, #${ID}-picker .ccd:hover { background: var(--chord-bg); border-color: var(--line); }
+    #${ID}-strip .ccd.on, #${ID}-picker .ccd.on { background: var(--chord-bg); border-color: var(--chord); }
+    #${ID}-strip .ccd-name, #${ID}-picker .ccd-name, #${ID}-tip .tip-name { font: 700 11px var(--sans); color: var(--fg); }
+    #${ID}-strip .ccd-empty { color: var(--soft); font: 500 12px var(--sans); padding: 8px 0; }
+    #${ID} .ccd-svg .nut { stroke: var(--fg); stroke-width: 2; }
+    #${ID} .ccd-svg .fret, #${ID} .ccd-svg .str { stroke: var(--soft); stroke-width: 1; fill: none; }
+    #${ID} .ccd-svg .dot { fill: var(--chord); }
+    #${ID} .ccd-svg .finger { fill: #fff; font: 700 8px var(--sans); pointer-events: none; }
+    #${ID} .ccd-svg .mark, #${ID} .ccd-svg .fretnum { fill: var(--soft); font: 700 10px var(--sans); }
+
+    /* ---------- chord hover tooltip ---------- */
+    #${ID}-tip { position: absolute; z-index: 60; display: none; flex-direction: column; align-items: center; gap: 4px;
+      padding: 10px 12px 8px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.25); cursor: pointer; }
+    #${ID}-tip.on { display: flex; }
+    #${ID}-tip .tip-hint { font: 500 10px var(--sans); color: var(--soft); }
+
+    /* ---------- chord variation picker ---------- */
+    #${ID}-picker { position: absolute; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.4); }
+    #${ID}-picker.on { display: flex; }
+    #${ID}-picker .cp { max-width: 92%; max-height: 84%; display: flex; flex-direction: column; background: var(--bg);
+      border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; box-shadow: 0 12px 40px rgba(0,0,0,.4); }
+    #${ID}-picker .cp-head { display: flex; align-items: baseline; gap: 10px; margin-bottom: 12px; }
+    #${ID}-picker .cp-head b { font: 700 18px var(--sans); color: var(--chord); }
+    #${ID}-picker .cp-head span { font: 500 12px var(--sans); color: var(--soft); }
+    #${ID}-picker .cp-grid { display: flex; flex-wrap: wrap; gap: 10px; overflow: auto; justify-content: center; }
+
     /* ---------- print: the view on one A4 page ---------- */
     @media print {
       body > *:not(#${ID}) { display: none !important; }
@@ -390,6 +624,7 @@
       #${ID} .bar .grp, #${ID} .bar button { display: none !important; }
       #${ID} .bar { background: none; border: 0; padding: 0 0 2mm; }
       #${ID} .cols { padding: 0; }
+      #${ID}-strip, #${ID}-tip, #${ID}-picker { display: none !important; }
       @page { size: A4; margin: 10mm; }
     }`;
   const LOCK = 'html, body { overflow: hidden !important; }';
@@ -416,6 +651,7 @@
         <span class="capo"></span>
         <span class="grp">
           <button data-a="tab"><span class="k">T</span>${L.tabs}</button>
+          ${HAS_CHORDS ? `<button data-a="chords"><span class="k">C</span>${L.chords}</button>` : ''}
           <button data-a="print"><span class="k">P</span>${L.print}</button>
           <button data-a="theme"><span class="k">D</span><i></i></button>
           <button data-a="fs"><span class="k">F</span>${L.fullscreen}</button>
@@ -425,7 +661,9 @@
           <button data-a="off"><span class="k">Esc</span>${L.exit}</button>
         </span>
       </div>
-      <div class="cols"></div>`;
+      ${HAS_CHORDS ? `<div id="${ID}-strip"></div>` : ''}
+      <div class="cols"></div>
+      ${HAS_CHORDS ? `<div id="${ID}-tip"></div><div id="${ID}-picker"><div class="cp"></div></div>` : ''}`;
     cols = ov.querySelector('.cols');
     titleEl = ov.querySelector('.t');
     keyEl = ov.querySelector('.key');
@@ -433,10 +671,57 @@
     capoEl = ov.querySelector('.capo');
     tabBtn = ov.querySelector('[data-a="tab"]');
     lockEl = ov.querySelector('style.lock');
+    chordBtn = ov.querySelector('[data-a="chords"]');
+    chordStrip = HAS_CHORDS ? ov.querySelector(`#${ID}-strip`) : null;
+    chordTip = HAS_CHORDS ? ov.querySelector(`#${ID}-tip`) : null;
+    chordPicker = HAS_CHORDS ? ov.querySelector(`#${ID}-picker .cp`) : null;
     ov.querySelector('.bar').addEventListener('click', safe('bar', (e) => {
       const b = e.target.closest('button');
       if (b) act(b.dataset.a);
     }));
+    if (HAS_CHORDS) {
+      loadChords();
+      chordStripOn = store(`${ID}-chords-on`) === '1';
+      cols.addEventListener('mouseover', safe('tip-over', (e) => {
+        const b = e.target.closest('.blk b');
+        if (!b) return;
+        const name = chordName((b.textContent || '').trim());
+        if (!chordShape(name)) return;
+        const r = b.getBoundingClientRect();
+        showTip(name, r.left + r.width / 2, r.top);
+      }));
+      cols.addEventListener('mouseout', safe('tip-out', (e) => {
+        if (e.target.closest('.blk b')) hideTip();
+      }));
+      chordTip.addEventListener('mouseover', safe('tip-over', () => clearTimeout(tipHideT)));
+      chordTip.addEventListener('mouseout', safe('tip-out', () => hideTip()));
+      ov.addEventListener('click', safe('chord-click', (e) => {
+        const cell = e.target.closest('.ccd');
+        if (cell) {
+          const name = cell.getAttribute('data-chord');
+          if (cell.closest(`#${ID}-picker`)) {
+            const idx = cell.getAttribute('data-idx');
+            const vs = idx !== null ? chordVariations(name) : null;
+            const sh = vs && vs[+idx];
+            if (name && sh) { chordPrefs[name] = sh; saveChords(); hidePicker(); renderStrip(curBlocks); }
+          } else {
+            renderPicker(name);
+          }
+          e.stopPropagation(); return;
+        }
+        const tip = e.target.closest(`#${ID}-tip`);
+        if (tip) { renderPicker(tip.getAttribute('data-chord')); e.stopPropagation(); return; }
+        const b = e.target.closest('.blk b');
+        if (b) {
+          const name = chordName((b.textContent || '').trim());
+          if (chordShape(name)) { renderPicker(name); e.stopPropagation(); }
+        }
+      }));
+      chordPicker.parentElement.addEventListener('click', safe('picker-bg', (e) => {
+        if (e.target === chordPicker.parentElement) hidePicker();
+      }));
+      syncChords();
+    }
 
     dock = document.createElement('div');
     dock.id = `${ID}-dock`;
@@ -479,6 +764,7 @@
       }
     }
     if (a === 'tab') { ov.classList.toggle('notab'); store(`${ID}-notab`, ov.classList.contains('notab') ? '1' : '0'); syncBtns(); fit(); }
+    if (a === 'chords') { chordStripOn = !chordStripOn; store(`${ID}-chords-on`, chordStripOn ? '1' : '0'); syncChords(); fit(); }
     if (a === 'print') window.print();
     if (a === 'theme') { SITE.toggleTheme(); syncTheme(); }
     if (a === 'fs') {
@@ -539,6 +825,7 @@
     const c = SITE.readCapo();
     capoEl.textContent = [c.capo ? `${L.capo} ${c.capo}` : '', c.tuning].filter(Boolean).join(' · ');
     tabBtn.style.display = blocks.some((b) => b.kind === 'tab') ? '' : 'none';
+    if (HAS_CHORDS) { chordsData = readChords(); hideTip(); hidePicker(); renderStrip(blocks); }
 
     const html = [];
     const lens = [];
@@ -659,7 +946,7 @@
   });
 
   // ---------- keys ----------
-  const KEYS = { '[': 'down', ']': 'up', t: 'tab', p: 'print', d: 'theme', f: 'fs', '+': 'plus', '=': 'plus', '-': 'minus', '0': 'auto' };
+  const KEYS = { '[': 'down', ']': 'up', t: 'tab', c: 'chords', p: 'print', d: 'theme', f: 'fs', '+': 'plus', '=': 'plus', '-': 'minus', '0': 'auto' };
   document.addEventListener('keydown', safe('keys', (e) => {
     if (!built || e.ctrlKey || e.metaKey || e.altKey) return;
     if (/input|textarea|select/i.test(e.target.tagName) || e.target.isContentEditable) return;
